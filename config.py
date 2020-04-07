@@ -9,6 +9,6 @@ DEBUG = True
 # Connect to the database
 
 
-# TODO: IMPLEMENT DATABASE URL ✅
+# ✅ TODO: IMPLEMENT DATABASE URL
 SQLALCHEMY_DATABASE_URI = 'postgres://bunty@localhost:5432/fyuurdb'
 SQLALCHEMY_TRACK_MODIFICATIONS = False  # silence the deprecation warning
