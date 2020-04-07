@@ -33,9 +33,9 @@ class VenueForm(Form):
         choices=Genre.choices()
     )
     facebook_link = StringField(
-        'facebook_link', validators=[Optional(), URL()]
+        'facebook_link', validators=[DataRequired(), URL()]
     )
-    # TODO: Add missing fields
+    # 🚧  TODO: Add missing fields TODO: update validators
     website_link = StringField(
         'website_link', validators=[Optional(), URL()]
     )
@@ -84,7 +84,8 @@ class ArtistForm(Form):
         check if implementation is correct and does not trigger any errors
         if no errors, apply to all optional fields
         '''
-        'facebook_link', validators=[Optional(), URL()]
+        # 'facebook_link', validators=[Optional(), URL()]
+        'facebook_link', validators=[URL()]
     )
     # TODO: Add missing fields
 
