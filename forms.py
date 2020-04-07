@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
-from wtforms.validators import DataRequired, AnyOf, URL, Regexp
+from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Optional
 from enums import state_choices, genre_choices
 # from enums import State, Genre # see alternate implementation
 
@@ -35,6 +35,7 @@ class VenueForm(Form):
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
     )
+    # TODO: Add missing fields
 
 
 class ArtistForm(Form):
@@ -65,13 +66,20 @@ class ArtistForm(Form):
         choices=genre_choices
     )
     ''''
+    https://knowledge.udacity.com/questions/77530
     'genres', validators=[DataRequired(), AnyOf( [ (choice.value) for choice in Genre ] )],
     choices=Genre.choices()
     '''
     facebook_link = StringField(
-        # TODO implement enum restriction
-        'facebook_link', validators=[URL()]
+        # 🤔 TODO implement enum restriction
+        '''
+        adds optional validator, to stop validation chain
+        check if implementation is correct and does not trigger any errors
+        if no errors, apply to all optional fields
+        '''
+        'facebook_link', validators=[Optional(), URL()]
     )
+    # TODO: Add missing fields
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
 
@@ -88,3 +96,4 @@ class ShowForm(Form):
         validators=[DataRequired()],
         default=datetime.today()
     )
+    # TODO: Add missing fields
