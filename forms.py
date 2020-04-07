@@ -1,6 +1,6 @@
 from datetime import datetime
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
+from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
 from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Optional
 # from enums import state_choices, genre_choices
 from enums import State, Genre  # see alternate implementation
@@ -13,11 +13,6 @@ class VenueForm(Form):
     city = StringField(
         'city', validators=[DataRequired()]
     )
-    # state = SelectField(
-    #     # ✅ TODO implement enum restriction
-    #     'state', validators=[DataRequired(), AnyOf(state_choices)],
-    #     choices=state_choices
-    # )
     state = SelectField(
         # ✅ TODO implement enum restriction
         'state', validators=[DataRequired(), AnyOf([(choice.value) for choice in State])],
@@ -27,25 +22,27 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone'
+        'phone', validators=[Regexp(r'^[0-9\-\+]+$')]
     )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[URL()]
     )
-    # genres = SelectMultipleField(
-    #     # ✅ TODO implement enum restriction
-    #     'genres', validators=[DataRequired(), AnyOf(genre_choices)],
-    #     choices=genre_choices
-    # )
     genres = SelectMultipleField(
         # ✅ TODO implement enum restriction
         'genres', validators=[DataRequired(), AnyOf([(choice.value) for choice in Genre])],
         choices=Genre.choices()
     )
     facebook_link = StringField(
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[Optional(), URL()]
     )
     # TODO: Add missing fields
+    website_link = StringField(
+        'website_link', validators=[Optional(), URL()]
+    )
+    seeking_talent = BooleanField(
+        'seeking_talent',
+    )
+    seeking_description = StringField('seeking_description',)
 
 
 class ArtistForm(Form):
@@ -60,11 +57,6 @@ class ArtistForm(Form):
         'state', validators=[DataRequired(), AnyOf([(choice.value) for choice in State])],
         choices=State.choices()
     )
-    # state = SelectField(
-    #     # ✅ TODO implement enum restriction
-    #     'state', validators=[DataRequired(), AnyOf(state_choices)],
-    #     choices=state_choices
-    # )
     phone = StringField(
         # ✅ TODO implement validation logic for state
         # https://knowledge.udacity.com/questions/105337
@@ -73,13 +65,8 @@ class ArtistForm(Form):
         )
     )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[URL()]
     )
-    # genres = SelectMultipleField(
-    #     # ✅ TODO implement enum restriction
-    #     'genres', validators=[DataRequired(), AnyOf(genre_choices)],
-    #     choices=genre_choices
-    # )
     genres = SelectMultipleField(
         # ✅ TODO implement enum restriction
         'genres', validators=[DataRequired(), AnyOf([(choice.value) for choice in Genre])],
@@ -91,8 +78,8 @@ class ArtistForm(Form):
     choices=Genre.choices()
     '''
     facebook_link = StringField(
-        # 🤔 TODO implement enum restriction
         '''
+        🤔 TODO implement enum restriction
         adds optional validator, to stop validation chain
         check if implementation is correct and does not trigger any errors
         if no errors, apply to all optional fields
