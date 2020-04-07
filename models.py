@@ -45,7 +45,7 @@ class Artist(db.Model):
 
 # print(Artist)
 
-# TODO: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# ✅ TODO: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
 
 class Show(db.Model):

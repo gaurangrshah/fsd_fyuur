@@ -75,7 +75,7 @@ class Artist(db.Model):
 
 # print(Artist)
 
-# TODO: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# ✅ TODO: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
 
 class Show(db.Model):
@@ -85,9 +85,6 @@ class Show(db.Model):
     start_time = db.Column(db.DateTime)
     artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'))
     venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'))
-
-
-print(Show)
 
 
 #----------------------------------------------------------------------------#
@@ -121,6 +118,10 @@ def index():
 
 @app.route('/venues')
 def venues():
+    """
+    GET all venues
+    :return: rendered venues
+    """
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
     data = [{
