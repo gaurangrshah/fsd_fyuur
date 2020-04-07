@@ -2,8 +2,8 @@ from datetime import datetime
 from flask_wtf import Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
 from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Optional
-from enums import state_choices, genre_choices
-# from enums import State, Genre # see alternate implementation
+# from enums import state_choices, genre_choices
+from enums import State, Genre  # see alternate implementation
 
 
 class VenueForm(Form):
@@ -13,10 +13,15 @@ class VenueForm(Form):
     city = StringField(
         'city', validators=[DataRequired()]
     )
+    # state = SelectField(
+    #     # ✅ TODO implement enum restriction
+    #     'state', validators=[DataRequired(), AnyOf(state_choices)],
+    #     choices=state_choices
+    # )
     state = SelectField(
         # ✅ TODO implement enum restriction
-        'state', validators=[DataRequired(), AnyOf(state_choices)],
-        choices=state_choices
+        'state', validators=[DataRequired(), AnyOf([(choice.value) for choice in State])],
+        choices=State.choices()
     )
     address = StringField(
         'address', validators=[DataRequired()]
@@ -27,10 +32,15 @@ class VenueForm(Form):
     image_link = StringField(
         'image_link'
     )
+    # genres = SelectMultipleField(
+    #     # ✅ TODO implement enum restriction
+    #     'genres', validators=[DataRequired(), AnyOf(genre_choices)],
+    #     choices=genre_choices
+    # )
     genres = SelectMultipleField(
         # ✅ TODO implement enum restriction
-        'genres', validators=[DataRequired(), AnyOf(genre_choices)],
-        choices=genre_choices
+        'genres', validators=[DataRequired(), AnyOf([(choice.value) for choice in Genre])],
+        choices=Genre.choices()
     )
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
@@ -47,9 +57,14 @@ class ArtistForm(Form):
     )
     state = SelectField(
         # ✅ TODO implement enum restriction
-        'state', validators=[DataRequired(), AnyOf(state_choices)],
-        choices=state_choices
+        'state', validators=[DataRequired(), AnyOf([(choice.value) for choice in State])],
+        choices=State.choices()
     )
+    # state = SelectField(
+    #     # ✅ TODO implement enum restriction
+    #     'state', validators=[DataRequired(), AnyOf(state_choices)],
+    #     choices=state_choices
+    # )
     phone = StringField(
         # ✅ TODO implement validation logic for state
         # https://knowledge.udacity.com/questions/105337
@@ -60,10 +75,15 @@ class ArtistForm(Form):
     image_link = StringField(
         'image_link'
     )
+    # genres = SelectMultipleField(
+    #     # ✅ TODO implement enum restriction
+    #     'genres', validators=[DataRequired(), AnyOf(genre_choices)],
+    #     choices=genre_choices
+    # )
     genres = SelectMultipleField(
         # ✅ TODO implement enum restriction
-        'genres', validators=[DataRequired(), AnyOf(genre_choices)],
-        choices=genre_choices
+        'genres', validators=[DataRequired(), AnyOf([(choice.value) for choice in Genre])],
+        choices=Genre.choices()
     )
     ''''
     https://knowledge.udacity.com/questions/77530
