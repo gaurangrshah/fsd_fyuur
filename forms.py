@@ -93,6 +93,7 @@ class ArtistForm(Form):
     seeking_venue = BooleanField(
         'seeking_talent',
     )
+    seeking_description = StringField('seeking_description',)
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
 

@@ -28,7 +28,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
 migrate = Migrate(app, db)
 
-print(db)
+
+#----------------------------------------------------------------------------#
+# Tasks.
+# TODO: Fix false value on seeking_talent, seeking_venue issue. update forms.py and all endpoints
+# TODO: Add error messages for form fields
+#----------------------------------------------------------------------------#
 
 
 #----------------------------------------------------------------------------#
@@ -57,7 +62,6 @@ class Venue(db.Model):
 
     def __repr__(self):
         return '<id: {}, name: {}, city: {}, state: {}, address: {},genres: {}, phone: {}, image: {}, facebook: {}, website: {}, seeking_talent: {}, seeking_description: {}, shows: {}>'.format(self.id, self.name, self.city, self.state, self.address, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_talent, self.seeking_description, self.shows)
-
 # print(Venue)
 
 
@@ -74,13 +78,12 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120))
     # ✅ TODO: implement any missing fields, as a database migration using Flask-Migrate
     website_link = db.Column(db.String(length=120))
-    # 🚧 updated seeking_talent to seekng_venue as per expected view template:
     seeking_venue = db.Column(db.Boolean, default=False)
-    # ❌ seeking_description = db.Column(db.Text) # not req'd by view template
+    seeking_description = db.Column(db.Text)  # 🚧 updates model
     shows = db.relationship('Show', backref='artist')
 
     def __repr__(self):
-        return '<id: {}, name: {}, city: {}, state: {}, genres: {}, phone: {}, image: {}, facebook: {}, website_link: {}, seeking_venue: {}>'.format(self.id, self.name, self.city, self.state, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_venue,)
+        return '<id: {}, name: {}, city: {}, state: {}, genres: {}, phone: {}, image: {}, facebook: {}, website_link: {}, seeking_venue: {}, seeking_description: {}>'.format(self.id, self.name, self.city, self.state, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_venue, self.seeking_description)
 # print(Artist)
 
 # ✅ TODO: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -135,7 +138,6 @@ def index():
 
 #  Venues
 #  ----------------------------------------------------------------
-
 @app.route('/venues')
 def venues():
     """
@@ -246,11 +248,8 @@ def show_venue(venue_id):
     data['upcoming_shows_count'] = len(data['upcoming_shows'])
     return render_template('pages/show_venue.html', venue=data)
 
-
 #  Create Venue
 #  ----------------------------------------------------------------
-
-
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
     form = VenueForm()
@@ -483,10 +482,9 @@ def edit_venue_submission(venue_id):
     # TODO: add documentation comment block
     return redirect(url_for('show_venue', venue_id=venue_id))
 
+
 #  Create Artist
 #  ----------------------------------------------------------------
-
-
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
     form = ArtistForm()
@@ -495,11 +493,30 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+    """
+    Create: Artist
+    return => pages/home
+    """
     # called upon submitting the new artist listing form
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
+    data = request.form
+    artist = Artist()
+    artist.name = data['name']
+    artist.city = data['city']
+    artist.state = data['state']
+    artist.phone = data['phone']
+    artist.genres = ';'.join(data.getlist('genres'))
+    artist.image_link = data['image_link']
+    artist.facebook_link = data['facebook_link']
+    artist.website_link = data['website_link']
+    artist.seeking_venue = isTruthy(data['seeking_venue'])
+    artist.seeking_description = data['seeking_description']
+    db.session.add(artist)
+    db.session.commit()
+    print(artist)
     # on successful db insert, flash success
     flash('Artist ' + request.form['name'] + ' was successfully listed!')
     # TODO: on unsuccessful db insert, flash an error instead.
@@ -509,7 +526,6 @@ def create_artist_submission():
 
 #  Shows
 #  ----------------------------------------------------------------
-
 @app.route('/shows')
 def shows():
     # displays list of shows at /shows
