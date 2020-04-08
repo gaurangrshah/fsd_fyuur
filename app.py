@@ -80,7 +80,7 @@ class Artist(db.Model):
     shows = db.relationship('Show', backref='artist')
 
     def __repr__(self):
-        return '<id: {}, name: {}, city: {}, state: {}, genres: {}, phone: {}, image: {}, facebook: {}, website_link: {}, seeking_venues: {}, seeking_description: {}>'.format(self.id, self.name, self.city, self.state, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_venues, self.seeking_description)
+        return '<id: {}, name: {}, city: {}, state: {}, genres: {}, phone: {}, image: {}, facebook: {}, website_link: {}, seeking_venue: {}>'.format(self.id, self.name, self.city, self.state, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_venue,)
 # print(Artist)
 
 # ✅ TODO: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -316,9 +316,13 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
+    """
+    Show: Artists
+    return => /Artists
+    """
     # TODO: replace with real data returned from querying the database
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
 
     artists = db.session.query(Artist).order_by(Artist.id).all()
     print(artists)
@@ -328,7 +332,7 @@ def artists():
             "id": artist.id,
             "name": artist.name
         })
-    # data = [{
+    # ❌ data = [{
     #     "id": 4,
     #     "name": "Guns N Petals",
     # }, {
