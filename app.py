@@ -35,6 +35,7 @@ print(db)
 # Models.
 #----------------------------------------------------------------------------#
 
+# TODO: FIX SHOW MODEL RELATIONSHIP
 
 class Venue(db.Model):
     __tablename__ = 'venue'
@@ -53,6 +54,9 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.Text)
     shows = db.relationship('Show', backref='venue')
+
+    def __repr__(self):
+        return '<id: {}, name: {}, city: {}, state: {}, address: {},genres: {}, phone: {}, image: {}, facebook: {}, website: {}, seeking_talent: {}, seeking_description: {}, shows: {}>'.format(self.id, self.name, self.city, self.state, self.address, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_talent, self.seeking_description, self.shows)
 
 # print(Venue)
 
@@ -135,33 +139,33 @@ def venues():
     """
     # ✅ TODO: replace with real venues data.
     # TODO: add try except finally blocks
+    # TODO: add documentation comment block
     #       num_shows should be aggregated based on number of upcoming shows per venue.
-    venue_groups = db.session.query(Venue.city, Venue.state).group_by(  # build venue groups
-        # check Venue term casing (might have to use lowercase to reference table)
+    locations = db.session.query(Venue.city, Venue.state).group_by(  # build venue groups
         Venue.city, Venue.state).all()
-    print(venue_groups)
     data = []
-    for venue_group in venue_groups:  # loop thru venue groups
-        city_name = venue_group[0]
-        city_state = venue_group[1]
+    for locale in locations:  # loop thru venue groups
+        city = locale[0]
+        state = locale[1]
         venue_query = db.session.query(Venue).filter(  # build venue query
-            Venue.city == city_name, Venue.state == city_state)
-        group = {
-            "city": city_name,
-            "state": city_state,
+            Venue.city == city, Venue.state == state)
+        location = {
+            "city": city,
+            "state": state,
             "venues": []
         }
         venues = venue_query.all()  # execute venue query
 
         for venue in venues:  # display venues
             print(venue.id)
-            group['venues'].append({
+            location['venues'].append({
                 "id": venue.id,
                 "name": venue.name,
                 "upcoming_show_count": len(venue.shows)
             })
-        data.append(group)
+        data.append(location)
     return render_template('pages/venues.html', areas=data)
+
     # ❌ removes dummy venue data
     # data = [{
     #     "city": "San Francisco",
@@ -214,6 +218,7 @@ def search_venues():
         response["data"].append(v_obj)  # append venues to response.data
     response["count"] = len(response['data'])  # set count for matching venues
     return render_template('pages/search_venues.html', results=response, search_term=search_term)
+
     # ❌ removes dummy search result data
     # response = {
     #     "count": 1,
@@ -244,10 +249,9 @@ def show_venue(venue_id):
         redirect('/venues')  # redirect users to a list of venues
     data = get_row(venue)  # returns dictionary from table properties
 
-    # TODO: uncommit, genres, past_shows, upcoming_show -- ‼️ after updating model
-    # data["genres"] = data["genres"].split(';') if data['genres'] else []
-    # data["past_shows"] = []
-    # data["upcoming_show"] = []
+    data["genres"] = data["genres"].split(';') if data['genres'] else []
+    data["past_shows"] = []
+    data["upcoming_shows"] = []
     now_datetime = datetime.now()
     # loop thru shows and show info to venue data:
     for show in venue.shows:
@@ -258,21 +262,17 @@ def show_venue(venue_id):
             "start_time": str(show.start_time)
         }
         print("/venue/id: show_obj", show_obj)
-
-        # TODO: uncomment, past_shows, upcoming_show -- ‼️ after updating model
         # # check if show is upcoming or a past show:
-        # if show.start_time <= now_datetime:
-        #     data['past_shows'].append(show_obj)  # add show to past shows
-        # else:
-        #     # add show to upcoming shows
-        #     data['upcoming_shows'].append(show_obj)
+        if show.start_time <= now_datetime:
+            data['past_shows'].append(show_obj)  # add show to past shows
+        else:
+            # add show to upcoming shows
+            data['upcoming_shows'].append(show_obj)
 
-    # TODO: uncomment, past_shows, upcoming_show -- ‼️ after updating model
-    # # get past shows count
-    # data['past_shows_count'] = len(data['past_shows'])
-    # # get upcoming shows count
-    # data['upcoming_shows_count'] = len(data['upcoming_shows'])
-    # return template
+    # get past shows count
+    data['past_shows_count'] = len(data['past_shows'])
+    # get upcoming shows count
+    data['upcoming_shows_count'] = len(data['upcoming_shows'])
     return render_template('pages/show_venue.html', venue=data)
 
     # ❌ removes dummy data
@@ -363,10 +363,6 @@ def show_venue(venue_id):
 
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
-    # """ 🚧
-    # Render create_venue template to user
-    # :return: Rendered create_venue form view template
-    # """
     form = VenueForm()
     return render_template('forms/new_venue.html', form=form)
 
@@ -375,6 +371,8 @@ def create_venue_form():
 def create_venue_submission():
     # ✅  TODO: insert form data as a new Venue record in the db, instead
     # ✅  TODO: modify data to be the data object returned from db insertion
+    # TODO: add try, except, finally block
+    # TODO: add documentation comment block
     form = VenueForm()
     if not form.validate_on_submit():  # if validation fails?? 🚧
         data = request.form  # grab values from form as data
@@ -384,9 +382,10 @@ def create_venue_submission():
         # evaluate seeking talent property:
         venue.seeking_talent = isTruthy(data['seeking_talent'])
         venue.seeking_description = data['seeking_description']
+        venue.shows = []
         db.session.add(venue)  # pending changes
         db.session.commit()  # commit changes
-        # TODO: on unsuccessful db insert, flash an error instead.
+        # ✅ TODO: on unsuccessful db insert, flash an error instead.
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
     else:
         flash('An error occurred. Venue ' +
@@ -407,22 +406,21 @@ def delete_venue(venue_id):
     # print('deleting..', venue_id)
     # TODO: Complete this endpoint for taking a venue_id, using SQLAlchemy ORM to delete a record.
     # TODO: Handle cases where the session commit could fail. note(add rollback())
-    # print(venue_id, 'venue_id')
+    # TODO: add try, except, finally block
+    # TODO: add documentation comment block
     venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
-    # print('venue', venue)
 
     if not venue:
         flash('Venue not found. Please Try again.' + str(venue_id))
         return redirect('/venues')
     # TODO: check if venue has shows if so raise error:
-    # if len(venue['shows']) != 0:
-        # Show.query.filter(Show.venue.id == venue_id).delete()
-        # flash('Venues with shows listed cannot be deleted, Please remove all shows first.')
-        # TODO: delete associated genres -- 🚧 after model update
+    if len(venue.shows) != 0:
+        Show.query.filter(Show.venue.id == venue_id).delete()
+        flash('Venues with shows listed cannot be deleted, Please remove all shows first.')
         return redirect('/venues/' + str(venue_id))
     db.session.delete(venue)
     db.session.commit()
-    # TODO: BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
+    # ✅ TODO: BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
     return redirect('/venues')
 
