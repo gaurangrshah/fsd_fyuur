@@ -390,10 +390,11 @@ def show_artist(artist_id):
         "city": artist.city,
         "state": artist.state,
         "phone": artist.phone,
-        "seeking_venue": artist.seeking_venue,
         "image_link": artist.image_link,
         "facebook_link": artist.facebook_link,
         "website_link": artist.website_link,
+        "seeking_venue": artist.seeking_venue,
+        "seeking_description": artist.seeking_description,
         "past_shows": [],
         "upcoming_shows": [],
         "past_shows_count": 0,
@@ -501,7 +502,7 @@ def create_artist_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅  TODO: add documentation comment block
     data = request.form
     artist = Artist()
     artist.name = data['name']
