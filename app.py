@@ -74,10 +74,13 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120))
     # ✅ TODO: implement any missing fields, as a database migration using Flask-Migrate
     website_link = db.Column(db.String(length=120))
-    seeking_talent = db.Column(db.Boolean, default=False)
-    seeking_description = db.Column(db.Text)
+    # 🚧 updated seeking_talent to seekng_venue as per expected view template:
+    seeking_venue = db.Column(db.Boolean, default=False)
+    # ❌ seeking_description = db.Column(db.Text) # not req'd by view template
     shows = db.relationship('Show', backref='artist')
 
+    def __repr__(self):
+        return '<id: {}, name: {}, city: {}, state: {}, genres: {}, phone: {}, image: {}, facebook: {}, website_link: {}, seeking_venues: {}, seeking_description: {}>'.format(self.id, self.name, self.city, self.state, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_venues, self.seeking_description)
 # print(Artist)
 
 # ✅ TODO: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -134,8 +137,8 @@ def index():
 @app.route('/venues')
 def venues():
     """
-    GET all venues ✅
-    :return: rendered venues, grouped by city, with aggregated count
+    Show: /Venues
+    return => rendered venues, grouped by city, with aggregated count
     """
     # ✅ TODO: replace with real venues data.
     # TODO: add try except finally blocks
@@ -200,8 +203,9 @@ def search_venues():
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
     """
-    :venue_id: id of requested venue
-    :return: template page for requested venue, when no venues match user is redirected to venues list page and given an error message.
+    Show: /Veneus/venue_id
+    @params: venue_id = id of requested venue
+    return => template page for requested venue, when no venues match user is redirected to venues list page and given an error message.
     """
     # ✅ TODO: replace with real venue data from the venues table, using venue_id
     # TODO: add try, except, finally block
@@ -283,12 +287,12 @@ def create_venue_submission():
 @app.route('/venues/<string:venue_id>/delete', methods=['GET'])
 def delete_venue(venue_id):
     """
-    Delete venue
-    :param: venue_id: venue to be deleted
-    :return: venue list view on success, else: flash error
+    Delete =>  venue
+    @params: venue_id: venue to be deleted
+    return => venue list view on success, else: flash error
     """
     # print('deleting..', venue_id)
-    # TODO: Complete this endpoint for taking a venue_id, using SQLAlchemy ORM to delete a record.
+    # ✅  TODO: Complete this endpoint for taking a venue_id, using SQLAlchemy ORM to delete a record.
     # TODO: Handle cases where the session commit could fail. note(add rollback())
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
@@ -313,16 +317,27 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
     # TODO: replace with real data returned from querying the database
-    data = [{
-        "id": 4,
-        "name": "Guns N Petals",
-    }, {
-        "id": 5,
-        "name": "Matt Quevedo",
-    }, {
-        "id": 6,
-        "name": "The Wild Sax Band",
-    }]
+    # TODO: add try, except, finally block
+    # TODO: add documentation comment block
+
+    artists = db.session.query(Artist).order_by(Artist.id).all()
+    print(artists)
+    data = []
+    for artist in artists:
+        data.append({
+            "id": artist.id,
+            "name": artist.name
+        })
+    # data = [{
+    #     "id": 4,
+    #     "name": "Guns N Petals",
+    # }, {
+    #     "id": 5,
+    #     "name": "Matt Quevedo",
+    # }, {
+    #     "id": 6,
+    #     "name": "The Wild Sax Band",
+    # }]
     return render_template('pages/artists.html', artists=data)
 
 
