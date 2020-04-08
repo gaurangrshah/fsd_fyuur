@@ -202,7 +202,7 @@ def search_venues():
     # grab search term from user input
     search_term = request.form.get('search_term', '')
     # query for venue search terms, allow for name, city & state
-    venues = db.session.query(Venue).filter((Venue.nameilike('%{}%'.format(search_term))) |
+    venues = db.session.query(Venue).filter((Venue.name.ilike('%{}%'.format(search_term))) |
                                             (Venue.city.ilike('%{}%'.format(search_term))) |
                                             (Venue.state.ilike('%{}%'.format(search_term)))).all()
     response = {  # set default response values
