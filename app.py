@@ -238,7 +238,6 @@ def show_venue(venue_id):
             "artist_image_link": show.artist.image_link,
             "start_time": str(show.start_time)
         }
-        print("/venue/id: show_obj", show_obj)
         # # check if show is upcoming or a past show:
         if show.start_time <= now_datetime:
             data['past_shows'].append(show_obj)  # add show to past shows
@@ -308,9 +307,10 @@ def delete_venue(venue_id):
         return redirect('/venues')
     # TODO: check if venue has shows if so raise error:
     if len(venue.shows) != 0:
-        Show.query.filter(Show.venue.id == venue_id).delete()
-        flash('Venues with shows listed cannot be deleted, Please remove all shows first.')
-        return redirect('/venues/' + str(venue_id))
+        show = Show.query.filter(Show.venue_id == venue_id).first()
+        db.session.delete(show)
+        flash('Venue deleted successfully, with Shows.')
+        # ❌ return redirect('/venues/' + str(venue_id))
     db.session.delete(venue)
     db.session.commit()
     # ✅ TODO: BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
