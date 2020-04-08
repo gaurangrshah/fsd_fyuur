@@ -94,6 +94,8 @@ class Show(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'))
     venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'))
 
+    def __repr__(self):
+        return '<id: {}, start_time: {}, artist_id: {}, venue_id: {}>'.format(self.id, self.start_time, self.artist_id, self.venue_id)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -348,17 +350,38 @@ def artists():
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
     # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+    # TODO: add try, except, finally block
+    # TODO: add documentation comment block
     # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
-    response = {
-        "count": 1,
-        "data": [{
-            "id": 4,
-            "name": "Guns N Petals",
-            "num_upcoming_shows": 0,
-        }]
+
+    # grab search term from user input
+    search_term = request.form.get('search_term', '')
+    # query for artist allow for search by name, city, state
+    artists = db.session.query(Artist).filter((Artist.name.ilike('%{}%'.format(search_term))) | (
+        Artist.city.ilike('%{}%'.format(search_term))) | (Artist.state.ilike('%{}%'.format(search_term)))).all()
+    response = {  # set defaults
+        'count': 0,
+        'data': []
     }
-    return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+    for artist in artists:  # loop thru artists and build artist result
+        artist_obj = {
+            'id': artist.id,
+            'name': artist.name,
+            'num_upcoming_shows': len(artist.shows)
+        }
+    response['data'].append(artist_obj)  # append artist
+    response['count'] = len(response['data'])  # get count of total artists
+
+    # ❌ response = {
+    #     "count": 1,
+    #     "data": [{
+    #         "id": 4,
+    #         "name": "Guns N Petals",
+    #         "num_upcoming_shows": 0,
+    #     }]
+    # }
+    return render_template('pages/search_artists.html', results=response, search_term=search_term)
 
 
 @app.route('/artists/<int:artist_id>')
