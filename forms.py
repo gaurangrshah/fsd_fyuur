@@ -60,9 +60,8 @@ class ArtistForm(Form):
     phone = StringField(
         # ✅ TODO implement validation logic for state
         # https://knowledge.udacity.com/questions/105337
-        phone=StringField(
-            'phone', validators=[Regexp(r'^[0-9\-\+]+$')]
-        )
+        # 🚧 fixes phone validator
+        'phone', validators=[Regexp(r'^[0-9\-\+]+$')]
     )
     image_link = StringField(
         'image_link', validators=[URL()]
@@ -88,6 +87,12 @@ class ArtistForm(Form):
         'facebook_link', validators=[URL()]
     )
     # TODO: Add missing fields
+    website_link = StringField(
+        'website_link', validators=[Optional(), URL()]
+    )
+    seeking_venue = BooleanField(
+        'seeking_talent',
+    )
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
 
