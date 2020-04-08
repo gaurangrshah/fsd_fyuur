@@ -114,6 +114,10 @@ def get_row(row):
     return {col.name: getattr(row, col.name) for col in row.__table__.columns}
 
 
+def isTruthy(condition):
+    return True if condition else False
+
+
 @app.route('/')
 def index():
     return render_template('pages/home.html')
@@ -231,17 +235,18 @@ def show_venue(venue_id):
     # ✅ TODO: replace with real venue data from the venues table, using venue_id
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
-    # query returns first matching venue to matching venue_id
-    venue = db.sessions.query(Venue).filter_by(id=venue_id).first()
 
+    venue = db.session.query(Venue).filter_by(id=venue_id).first()
+    # query returns first matching venue to matching venue_id
     if not venue:  # if no venues match for the given id
         flash('Sorry this venue is not in our records')  # output error message
-        redirect('venues')  # redirect users to a list of venues
-
+        redirect('/venues')  # redirect users to a list of venues
     data = get_row(venue)  # returns dictionary from table properties
-    data["genres"] = data["genres"].split(';') if data['genres'] else []
-    data["past_shows"] = []
-    data["upcoming_show"] = []
+
+    # TODO: uncommit, genres, past_shows, upcoming_show -- ‼️ after updating model
+    # data["genres"] = data["genres"].split(';') if data['genres'] else []
+    # data["past_shows"] = []
+    # data["upcoming_show"] = []
     now_datetime = datetime.now()
     # loop thru shows and show info to venue data:
     for show in venue.shows:
@@ -251,17 +256,21 @@ def show_venue(venue_id):
             "artist_image_link": show.artist.image_link,
             "start_time": str(show.start_time)
         }
-        # check if show is upcoming or a past show:
-        if show.start_time <= now_datetime:
-            data['past_shows'].append(show_obj)  # add show to past shows
-        else:
-            # add show to upcoming shows
-            data['upcoming_shows'].append(show_obj)
+        print("/venue/id: show_obj", show_obj)
 
-    # get past shows count
-    data['past_shows_count'] = len(data['past_shows'])
-    # get upcoming shows count
-    data['upcoming_shows_count'] = len(data['upcoming_shows'])
+        # TODO: uncomment, past_shows, upcoming_show -- ‼️ after updating model
+        # # check if show is upcoming or a past show:
+        # if show.start_time <= now_datetime:
+        #     data['past_shows'].append(show_obj)  # add show to past shows
+        # else:
+        #     # add show to upcoming shows
+        #     data['upcoming_shows'].append(show_obj)
+
+    # TODO: uncomment, past_shows, upcoming_show -- ‼️ after updating model
+    # # get past shows count
+    # data['past_shows_count'] = len(data['past_shows'])
+    # # get upcoming shows count
+    # data['upcoming_shows_count'] = len(data['upcoming_shows'])
     # return template
     return render_template('pages/show_venue.html', venue=data)
 
@@ -353,31 +362,68 @@ def show_venue(venue_id):
 
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
+    # """ 🚧
+    # Render create_venue template to user
+    # :return: Rendered create_venue form view template
+    # """
     form = VenueForm()
     return render_template('forms/new_venue.html', form=form)
 
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
-
-    # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
+    # ✅  TODO: insert form data as a new Venue record in the db, instead
+    # ✅  TODO: modify data to be the data object returned from db insertion
+    form = VenueForm()
+    if not form.validate_on_submit():  # if validation fails?? 🚧
+        data = request.form  # grab values from form as data
+        # build out new venue object from data properties
+        venue = Venue(name=data['name'], address=data['address'], city=data['city'], state=data['state'], phone=data['phone'],
+                      image_link=data['image_link'], facebook_link=data['facebook_link'], website_link=data['website_link'])
+        # evaluate seeking talent property:
+        venue.seeking_talent = isTruthy(data['seeking_talent'])
+        venue.seeking_description = data['seeking_description']
+        db.session.add(venue)  # pending changes
+        db.session.commit()  # commit changes
+        # TODO: on unsuccessful db insert, flash an error instead.
+        flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    else:
+        flash('An error occurred. Venue ' +
+              data.name + ' could not be listed. Please try again.')
+        return render_template('forms/new_venue.html', form=form)
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
 
 
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route('/venues/<string:venue_id>/delete', methods=['GET'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+    """
+    Delete venue
+    :param: venue_id: venue to be deleted
+    :return: venue list view on success, else: flash error
+    """
+    # print('deleting..', venue_id)
+    # TODO: Complete this endpoint for taking a venue_id, using SQLAlchemy ORM to delete a record.
+    # TODO: Handle cases where the session commit could fail. note(add rollback())
+    # print(venue_id, 'venue_id')
+    venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
+    # print('venue', venue)
 
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
+    if not venue:
+        flash('Venue not found. Please Try again.' + str(venue_id))
+        return redirect('/venues')
+    # TODO: check if venue has shows if so raise error:
+    # if len(venue['shows']) != 0:
+        # Show.query.filter(Show.venue.id == venue_id).delete()
+        # flash('Venues with shows listed cannot be deleted, Please remove all shows first.')
+        # TODO: delete associated genres -- 🚧 after model update
+        return redirect('/venues/' + str(venue_id))
+    db.session.delete(venue)
+    db.session.commit()
+    # TODO: BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
-    return None
+    return redirect('/venues')
 
 #  Artists
 #  ----------------------------------------------------------------
