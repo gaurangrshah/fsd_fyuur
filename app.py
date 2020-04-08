@@ -186,6 +186,7 @@ def venues():
 def search_venues():
     # ✅ TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
     # TODO: Add try, except, finally block
+    # TODO: Add documentation comment block
     # seach for Hop should return "The Musical Hop".
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
 
@@ -227,7 +228,9 @@ def show_venue(venue_id):
     :venue_id: id of requested venue
     :return: template page for requested venue, when no venues match user is redirected to venues list page and given an error message.
     """
-    # TODO: replace with real venue data from the venues table, using venue_id
+    # ✅ TODO: replace with real venue data from the venues table, using venue_id
+    # TODO: add try, except, finally block
+    # TODO: add documentation comment block
     # query returns first matching venue to matching venue_id
     venue = db.sessions.query(Venue).filter_by(id=venue_id).first()
 
