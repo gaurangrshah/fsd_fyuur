@@ -120,18 +120,19 @@ app.jinja_env.filters['datetime'] = format_datetime
 # Controllers.
 #----------------------------------------------------------------------------#
 
-# builds dictionary object from table properties
-
 
 def get_row(row):
+    # builds dictionary object from table properties
     return {col.name: getattr(row, col.name) for col in row.__table__.columns}
 
 
 def isTruthy(condition):
+    # checks if given conditions is truthy
     return True if condition else False
 
 
 def isNone(condition):
+    # check is condition exists otherwise deafults to None
     return condition if condition else None
 
 
