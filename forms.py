@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
-from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Optional
+from wtforms import StringField, SelectField, BooleanField, DateTimeField, TextAreaField, SelectMultipleField, RadioField
+from wtforms.validators import DataRequired, AnyOf, URL, Regexp, Optional, Required
 # from enums import state_choices, genre_choices
 from enums import State, Genre  # see alternate implementation
 
@@ -25,7 +25,7 @@ class VenueForm(Form):
         'phone', validators=[Regexp(r'^[0-9\-\+]+$')]
     )
     image_link = StringField(
-        'image_link', validators=[URL()]
+        'image_link', validators=[DataRequired(), URL()]
     )
     genres = SelectMultipleField(
         # ✅ TODO implement enum restriction
@@ -39,10 +39,12 @@ class VenueForm(Form):
     website_link = StringField(
         'website_link', validators=[Optional(), URL()]
     )
-    seeking_talent = BooleanField(
-        'seeking_talent',
-    )
-    seeking_description = StringField('seeking_description',)
+    # seeking_talent = BooleanField('Seeking talent',)
+    seeking_talent = RadioField(u'Seeking talent', choices=[
+        ('true', u'Yes'),
+        ('false', u'No')],
+        default='false', validators=[Required()])
+    seeking_description = TextAreaField('Seeking Description')
 
 
 class ArtistForm(Form):
@@ -90,9 +92,11 @@ class ArtistForm(Form):
     website_link = StringField(
         'website_link', validators=[Optional(), URL()]
     )
-    seeking_venue = BooleanField(
-        'seeking_talent',
-    )
+    # seeking_venue = BooleanField('Seeking Venue',)
+    seeking_venue = RadioField(u'Seeking venue', choices=[
+        ('true', u'Yes'),
+        ('false', u'No')],
+        default='false', validators=[Required()])
     seeking_description = StringField('seeking_description',)
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
