@@ -26,7 +26,6 @@ class Venue(db.Model):
 
     def __repr__(self):
         return '<id: {}, name: {}, city: {}, state: {}, address: {},genres: {}, phone: {}, image: {}, facebook: {}, website: {}, seeking_talent: {}, seeking_description: {}, shows: {}>'.format(self.id, self.name, self.city, self.state, self.address, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_talent, self.seeking_description, self.shows)
-# print(Venue)
 
 
 class Artist(db.Model):
@@ -48,7 +47,6 @@ class Artist(db.Model):
 
     def __repr__(self):
         return '<id: {}, name: {}, city: {}, state: {}, genres: {}, phone: {}, image: {}, facebook: {}, website_link: {}, seeking_venue: {}, seeking_description: {}>'.format(self.id, self.name, self.city, self.state, self.genres, self.phone, self.image_link, self.facebook_link, self.website_link, self.seeking_venue, self.seeking_description)
-# print(Artist)
 
 # ✅ TODO: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 

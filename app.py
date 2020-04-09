@@ -32,9 +32,10 @@ migrate = Migrate(app, db)
 
 #----------------------------------------------------------------------------#
 # Tasks.
-# TODO: ✅ FIX SHOW MODEL RELATIONSHIP
-# TODO: ✅ Fix false value on seeking_talent, seeking_venue issue. update forms.py and all endpoints
-# TODO: ✅ Add error messages for form fields
+# TODO: Add Try, Except Blocks for all endpoints that commit to db
+# TODO: update model nullability
+# TODO: Add form validate token to each form {{ form.csrf_token }}
+# TODO: Validate URLs in forms.py
 #----------------------------------------------------------------------------#
 
 
@@ -89,7 +90,7 @@ def venues():
     """
     # ✅ TODO: replace with real venues data.
     # TODO: add try except finally blocks
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
     #       num_shows should be aggregated based on number of upcoming shows per venue.
     locations = db.session.query(Venue.city, Venue.state).group_by(  # build venue groups
         Venue.city, Venue.state).all()
@@ -165,7 +166,8 @@ def show_venue(venue_id):
     venue = db.session.query(Venue).filter_by(id=venue_id).first()
     # query returns first matching venue to matching venue_id
     if not venue:  # if no venues match for the given id
-        flash('Sorry this venue is not in our records')  # output error message
+        flash('Sorry venue id: {} is not in our records'.format(
+            venue_id))  # output error message
         redirect('/venues')  # redirect users to a list of venues
     data = get_row(venue)  # returns dictionary from table properties
 
@@ -210,31 +212,45 @@ def create_venue_submission():
     """
     # ✅  TODO: insert form data as a new Venue record in the db, instead
     # ✅  TODO: modify data to be the data object returned from db insertion
-    # TODO: add try, except, finally block
-    # ✅ TODO: add documentation comment block
+    # ✅  TODO: add try, except, finally block
+    # ✅  TODO: add documentation comment block
+
+    error = False
     form = VenueForm()
-    if not form.validate_on_submit():  # if validation fails?? 🚧
+
+    # if not form.validate_on_submit():
+    try:
         data = request.form  # grab values from form as data
-        print(data['seeking_talent'])
         # build out new venue object from data properties
-        venue = Venue(name=data['name'], address=data['address'], city=data['city'], state=data['state'], phone=data['phone'],
-                      image_link=data['image_link'], facebook_link=data['facebook_link'], website_link=data['website_link'])
-        # evaluate seeking talent property:
-        # print('🚨', data['seeking_talent'])
-        venue.seeking_talent = isTruthy(data['seeking_talent'])
-        venue.seeking_description = data['seeking_description']
-        venue.shows = []
+        venue = Venue(
+            name=data['name'],
+            address=data['address'],
+            city=data['city'],
+            state=data['state'],
+            phone=data['phone'],
+            image_link=data['image_link'],
+            facebook_link=data['facebook_link'],
+            website_link=data['website_link'],
+            seeking_talent=isTruthy(data['seeking_talent']),
+            seeking_description=data['seeking_description'],
+            shows=[]
+        )
         db.session.add(venue)  # pending changes
         db.session.commit()  # commit changes
-        # ✅ TODO: on unsuccessful db insert, flash an error instead.
-        flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    else:
+
+    except:
+        error = True
+        db.session.rollback()
+    finally:
+        db.session.close()
+    if error:
         flash('An error occurred. Venue ' +
               data.name + ' could not be listed. Please try again.')
         return render_template('forms/new_venue.html', form=form)
-    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return render_template('pages/home.html')
+    else:
+        # ✅ TODO: on unsuccessful db insert, flash an error instead.
+        flash('Venue ' + request.form['name'] + ' was successfully listed!')
+        return render_template('pages/home.html')
 
 
 @app.route('/venues/<string:venue_id>/delete', methods=['GET'])
