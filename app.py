@@ -426,24 +426,49 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
+    """
+    Show: /artists/:artist_id/edit
+    @params: artist_id
+    return => /forms/edit_artist
+    """
+    # TODO: populate form with fields from artist with ID <artist_id>
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
     form = ArtistForm()
-    artist = {
-        "id": 4,
-        "name": "Guns N Petals",
-        "genres": ["Rock n Roll"],
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "326-123-5000",
-        "website": "https://www.gunsnpetalsband.com",
-        "facebook_link": "https://www.facebook.com/GunsNPetals",
-        "seeking_venue": True,
-        "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-        "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
+    # query artist property values
+    artist = db.session.query(Artist).filter(Artist.id == artist_id).first()
+    if not artist:
+        flash('Artist not found', 'error')
+        return redirect('/artists')
+    data = {  # buid for field values
+        "id": artist.id,
+        "name": artist.name,
+        "city": artist.city,
+        "state": artist.state,
+        "phone": artist.phone,
+        "image_link": artist.image_link,
+        "genres": artist.genres.split(';'),
+        "facebook_link": artist.facebook_link,
+        "website_link": artist.website_link,
+        "seeking_venue": artist.seeking_venue,
+        "seeking_description": artist.seeking_description,
     }
-    # TODO: populate form with fields from artist with ID <artist_id>
-    return render_template('forms/edit_artist.html', form=form, artist=artist)
+    return render_template('forms/edit_artist.html', form=form, artist=data)
+
+    # ❌ artist = {
+    #     "id": 4,
+    #     "name": "Guns N Petals",
+    #     "genres": ["Rock n Roll"],
+    #     "city": "San Francisco",
+    #     "state": "CA",
+    #     "phone": "326-123-5000",
+    #     "website": "https://www.gunsnpetalsband.com",
+    #     "facebook_link": "https://www.facebook.com/GunsNPetals",
+    #     "seeking_venue": True,
+    #     "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
+    #     "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
+    # }
+    # return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
@@ -453,6 +478,19 @@ def edit_artist_submission(artist_id):
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
 
+    artist = db.session.query(Artist).filter(Artist.id == artist_id).first()
+    data = request.form
+    artist.name = data['name']
+    artist.city = data['city']
+    artist.state = data['state']
+    artist.phone = data['phone']
+    artist.image_link = data['image_link']
+    artist.genres = ';'.join(data.getlist('genres'))
+    artist.facebook_link = data['facebook_link']
+    artist.website_link = data['website_link']
+    artist.seeking_venue = isTruthy(data['seeking_venue'])
+    artist.seeking_description = data['seeking_description']
+    db.session.commit()
     return redirect(url_for('show_artist', artist_id=artist_id))
 
 
