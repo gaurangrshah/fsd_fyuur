@@ -431,14 +431,14 @@ def edit_artist(artist_id):
     @params: artist_id
     return => /forms/edit_artist
     """
-    # TODO: populate form with fields from artist with ID <artist_id>
+    # ✅  TODO: populate form with fields from artist with ID <artist_id>
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
     form = ArtistForm()
     # query artist property values
     artist = db.session.query(Artist).filter(Artist.id == artist_id).first()
-    if not artist:
-        flash('Artist not found', 'error')
+    if not artist:  # handle error if no artist matches
+        flash('Artist not found')
         return redirect('/artists')
     data = {  # buid for field values
         "id": artist.id,
@@ -455,24 +455,14 @@ def edit_artist(artist_id):
     }
     return render_template('forms/edit_artist.html', form=form, artist=data)
 
-    # ❌ artist = {
-    #     "id": 4,
-    #     "name": "Guns N Petals",
-    #     "genres": ["Rock n Roll"],
-    #     "city": "San Francisco",
-    #     "state": "CA",
-    #     "phone": "326-123-5000",
-    #     "website": "https://www.gunsnpetalsband.com",
-    #     "facebook_link": "https://www.facebook.com/GunsNPetals",
-    #     "seeking_venue": True,
-    #     "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    #     "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
-    # }
-    # return render_template('forms/edit_artist.html', form=form, artist=artist)
-
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+    """
+    UPDATE: /artists/:artist_id/edit
+    @params: artist_id
+    return => /artist/:artist_id
+    """
     # TODO: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
     # TODO: add try, except, finally block
@@ -496,33 +486,64 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
+    """
+    Show: /venues/:venue_id/edit
+    @params: venue_id
+    return => /forms/edit_venue
+    """
+    # ✅  TODO: populate form with values from venue with ID <venue_id>
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
     form = VenueForm()
-    venue = {
-        "id": 1,
-        "name": "The Musical Hop",
-        "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-        "address": "1015 Folsom Street",
-        "city": "San Francisco",
-        "state": "CA",
-        "phone": "123-123-1234",
-        "website": "https://www.themusicalhop.com",
-        "facebook_link": "https://www.facebook.com/TheMusicalHop",
-        "seeking_talent": True,
-        "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-        "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
+    # query venue properties by venue_id
+    venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
+    print("🚨", venue)
+    if not venue:  # handle error if no venue matches
+        flash('Venue not found')
+        return redirect('/venues')
+    data = {
+        "id": venue.id,
+        "name": venue.name,
+        "genres": venue.genres,
+        "address": venue.address,
+        "city": venue.city,
+        "state": venue.state,
+        "phone": venue.phone,
+        "genres": venue.genres.split(';'),
+        "image_link": venue.image_link,
+        "website_link": venue.website_link,
+        "facebook_link": venue.facebook_link,
+        "seeking_talent": venue.seeking_talent,
+        "seeking_description": venue.seeking_description,
     }
-    # TODO: populate form with values from venue with ID <venue_id>
-    return render_template('forms/edit_venue.html', form=form, venue=venue)
+    return render_template('forms/edit_venue.html', form=form, venue=data)
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+    """
+    UPDATE: /venues/:venue_id/edit
+    @params: venue_id
+    return => /venues/:venue_id
+    """
     # TODO: take values from the form submitted, and update existing
     # venue record with ID <venue_id> using the new attributes
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
+
+    venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
+    data = request.form
+    venue.name = data['name']
+    venue.city = data['city']
+    venue.state = data['state']
+    venue.phone = data['phone']
+    venue.image_link = data['image_link']
+    venue.genres = ';'.join(data.getlist('genres'))
+    venue.facebook_link = data['facebook_link']
+    venue.website_link = data['website_link']
+    venue.seeking_talent = isTruthy(data['seeking_talent'])
+    venue.seeking_description = data['seeking_description']
+    db.session.commit()
     return redirect(url_for('show_venue', venue_id=venue_id))
 
 
