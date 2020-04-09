@@ -146,7 +146,7 @@ def index():
 def venues():
     """
     Show: /Venues
-    return => pages/venues.html
+    return => pages/venues
     """
     # ✅ TODO: replace with real venues data.
     # TODO: add try except finally blocks
@@ -180,9 +180,13 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
+    """
+    SEARCH: Venue
+    return => /pages/search_venues
+    """
     # ✅ TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
     # TODO: Add try, except, finally block
-    # TODO: Add documentation comment block
+    # ✅TODO: Add documentation comment block
     # seach for Hop should return "The Musical Hop".
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
 
@@ -212,12 +216,12 @@ def show_venue(venue_id):
     # shows the venue page with the given venue_id
     """
     Show: /Veneus/venue_id
-    @params: venue_id = id of requested venue
-    return => pages/show_venue.html
+    @params: venue_id
+    return => pages/show_venue
     """
     # ✅ TODO: replace with real venue data from the venues table, using venue_id
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
 
     venue = db.session.query(Venue).filter_by(id=venue_id).first()
     # query returns first matching venue to matching venue_id
@@ -261,10 +265,14 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+    """
+    CREATE: Venue
+    return => /pages/home
+    """
     # ✅  TODO: insert form data as a new Venue record in the db, instead
     # ✅  TODO: modify data to be the data object returned from db insertion
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
     form = VenueForm()
     if not form.validate_on_submit():  # if validation fails?? 🚧
         data = request.form  # grab values from form as data
@@ -292,14 +300,14 @@ def create_venue_submission():
 def delete_venue(venue_id):
     """
     Delete =>  venue
-    @params: venue_id: venue to be deleted
-    return => venue list view on success, else: flash error
+    @params: venue_id
+    return => /venues
     """
     # print('deleting..', venue_id)
     # ✅  TODO: Complete this endpoint for taking a venue_id, using SQLAlchemy ORM to delete a record.
     # TODO: Handle cases where the session commit could fail. note(add rollback())
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
     venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
 
     if not venue:
@@ -325,7 +333,7 @@ def artists():
     Show: Artists
     return => /Artists
     """
-    # TODO: replace with real data returned from querying the database
+    # ✅ TODO: replace with real data returned from querying the database
     # TODO: add try, except, finally block
     # ✅ TODO: add documentation comment block
 
@@ -342,9 +350,13 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+    """
+    SEARCH: Artist
+    return => /pages/search_artists
+    """
+    # ✅ TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
     # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
 
@@ -377,7 +389,7 @@ def show_artist(artist_id):
     result => pages/show_artist.html
     """
     # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
+    # ✅ TODO: replace with real venue data from the venues table, using venue_id
     # TODO: add try, except, finally block
     # ✅  TODO: add documentation comment block
 
@@ -433,7 +445,7 @@ def edit_artist(artist_id):
     """
     # ✅  TODO: populate form with fields from artist with ID <artist_id>
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
     form = ArtistForm()
     # query artist property values
     artist = db.session.query(Artist).filter(Artist.id == artist_id).first()
@@ -463,10 +475,10 @@ def edit_artist_submission(artist_id):
     @params: artist_id
     return => /artist/:artist_id
     """
-    # TODO: take values from the form submitted, and update existing
+    # ✅ TODO: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
 
     artist = db.session.query(Artist).filter(Artist.id == artist_id).first()
     data = request.form
@@ -493,7 +505,7 @@ def edit_venue(venue_id):
     """
     # ✅  TODO: populate form with values from venue with ID <venue_id>
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
     form = VenueForm()
     # query venue properties by venue_id
     venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
@@ -526,10 +538,10 @@ def edit_venue_submission(venue_id):
     @params: venue_id
     return => /venues/:venue_id
     """
-    # TODO: take values from the form submitted, and update existing
+    # ✅  TODO: take values from the form submitted, and update existing
     # venue record with ID <venue_id> using the new attributes
     # TODO: add try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
 
     venue = db.session.query(Venue).filter(Venue.id == venue_id).first()
     data = request.form
@@ -592,11 +604,11 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
     """
-    Show: view /Shows
-    return => /Shows
+    Show: /shows
+    return => /pages/shows
     """
     # displays list of shows at /shows
-    # TODO: replace with real venues data.
+    # ✅  TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
     # TODO: add try, except, finally block
     # TODO: add documentation comment block
@@ -627,12 +639,12 @@ def create_shows():
 def create_show_submission():
     """
     Create: /shows/create
-    return => success: pages/home | error: /shows/create
+    return => success: /pages/home | error: /shows/create
     """
     # called to create new shows in the db, upon submitting new show listing form
-    # TODO: insert form data as a new Show record in the db, instead
+    # ✅ TODO: insert form data as a new Show record in the db, instead
     # TODO: UPDATE try, except, finally block
-    # TODO: add documentation comment block
+    # ✅ TODO: add documentation comment block
 
     data = request.form  # grab data from form input
     show = Show()  # instantiate new show object
