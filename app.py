@@ -22,23 +22,11 @@ from models import *
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
+# ✅ TODO: connect to a local postgresql database
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = SQLALCHEMY_TRACK_MODIFICATIONS
-# db = SQLAlchemy(app)
 db.init_app(app)
-# ✅ TODO: connect to a local postgresql database
 migrate = Migrate(app, db)
-
-
-#----------------------------------------------------------------------------#
-# Tasks.
-# TODO: Add Try, Except Blocks for all endpoints that commit to db
-# TODO: Check default value when "No" is checked for boolean seeking field
-# TODO: update model nullability
-# TODO: ✅ Add form validate token to each form {{ form.csrf_token }}
-# TODO: check if upcoming and past shows get populated correctly
-# TODO: Check how to cascade shows on venue delete
-#----------------------------------------------------------------------------#
 
 
 #----------------------------------------------------------------------------#
@@ -67,12 +55,12 @@ def get_row(row):
     return {col.name: getattr(row, col.name) for col in row.__table__.columns}
 
 
-def isTruthy(condition):
+def is_true(condition):
     # checks if given conditions is truthy
-    return True if condition else False
+    return True if condition == 'true' else False
 
 
-def isNone(condition):
+def is_none(condition):
     # check is condition exists otherwise deafults to None
     return condition if condition else None
 
@@ -202,6 +190,7 @@ def show_venue(venue_id):
     data['upcoming_shows_count'] = len(data['upcoming_shows'])
     return render_template('pages/show_venue.html', venue=data)
 
+
 #  Create Venue
 #  ----------------------------------------------------------------
 @app.route('/venues/create', methods=['GET'])
@@ -234,7 +223,7 @@ def create_venue_submission():
             image_link=data['image_link'],
             facebook_link=data['facebook_link'],
             website_link=data['website_link'],
-            seeking_talent=isTruthy(data['seeking_talent']),
+            seeking_talent=is_true(data['seeking_talent']),
             seeking_description=data['seeking_description'],
             shows=[]
         )
@@ -281,6 +270,7 @@ def delete_venue(venue_id):
     finally:
         db.session.close()
         return redirect(url_for('venues'))
+
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -381,6 +371,7 @@ def show_artist(artist_id):
     data['upcoming_shows_count'] = len(data['upcoming_shows'])
     return render_template('pages/show_artist.html', artist=data)
 
+
 #  Update
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
@@ -418,7 +409,7 @@ def edit_artist_submission(artist_id):
     artist = db.session.query(Artist).filter(Artist.id == artist_id).first()
     try:
         data = request.form
-
+        print("🚨", data['seeking_venue'])
         artist.name = data['name']
         artist.city = data['city']
         artist.state = data['state']
@@ -427,7 +418,7 @@ def edit_artist_submission(artist_id):
         artist.genres = ';'.join(data.getlist('genres'))
         artist.facebook_link = data['facebook_link']
         artist.website_link = data['website_link']
-        artist.seeking_venue = isTruthy(data['seeking_venue'])
+        artist.seeking_venue = is_true(data['seeking_venue'])
         artist.seeking_description = data['seeking_description']
 
         db.session.commit()
@@ -486,7 +477,7 @@ def edit_venue_submission(venue_id):
         venue.genres = ';'.join(data.getlist('genres'))
         venue.facebook_link = data['facebook_link']
         venue.website_link = data['website_link']
-        venue.seeking_talent = isTruthy(data['seeking_talent'])
+        venue.seeking_talent = is_true(data['seeking_talent'])
         venue.seeking_description = data['seeking_description']
 
         db.session.commit()
@@ -499,6 +490,7 @@ def edit_venue_submission(venue_id):
     finally:
         db.session.close()
         return redirect(url_for('show_venue', venue_id=venue_id))
+
 
 #  Create Artist
 #  ----------------------------------------------------------------
@@ -529,7 +521,7 @@ def create_artist_submission():
             image_link=data['image_link'],
             facebook_link=data['facebook_link'],
             website_link=data['website_link'],
-            seeking_venue=isTruthy(data['seeking_venue']),
+            seeking_venue=is_true(data['seeking_venue']),
             seeking_description=data['seeking_description'],
             shows=[]
         )
@@ -570,11 +562,11 @@ def shows():
         artist = show.artist
         venue = show .venue
         data.append({
-            "venue_id": isNone(venue.id),
-            "venue_name": isNone(venue.name),
-            "artist_id": isNone(artist.id),
-            "artist_name": isNone(artist.name),
-            "artist_image_link": isNone(artist.image_link),
+            "venue_id": is_none(venue.id),
+            "venue_name": is_none(venue.name),
+            "artist_id": is_none(artist.id),
+            "artist_name": is_none(artist.name),
+            "artist_image_link": is_none(artist.image_link),
             "start_time": str(show.start_time),
         })
     return render_template('pages/shows.html', shows=data)
