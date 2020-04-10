@@ -115,6 +115,7 @@ def venues():
                 "upcoming_show_count": len(venue.shows)
             })
         data.append(location)
+    db.session.close()
     return render_template('pages/venues.html', areas=data)
 
 
@@ -216,7 +217,7 @@ def create_venue_form():
 def create_venue_submission():
     """
     CREATE: Venue
-    return => /pages/home
+    return => /venues
     """
 
     form = VenueForm()
@@ -284,16 +285,15 @@ def delete_venue(venue_id):
 #  Artists
 #  ----------------------------------------------------------------
 @app.route('/artists')
+# ✅ TODO: replace with real data returned from querying the database
 def artists():
     """
     Show: Artists
     return => /Artists
     """
-    # ✅ TODO: replace with real data returned from querying the database
-    # TODO: add try, except, finally block
-    # ✅ TODO: add documentation comment block
 
-    artists = db.session.query(Artist).order_by(Artist.id).all()
+    # artists = db.session.query(Artist).order_by(Artist.id).all()
+    artists = Artist.query.order_by(Artist.id).all()
     data = []
     for artist in artists:
         data.append({
@@ -556,17 +556,15 @@ def create_artist_submission():
 #  Shows
 #  ----------------------------------------------------------------
 @app.route('/shows')
+# ✅  TODO: replace with real venues data.
+#       num_shows should be aggregated based on number of upcoming shows per venue.
 def shows():
     """
     Show: /shows
     return => /pages/shows
     """
-    # displays list of shows at /shows
-    # ✅  TODO: replace with real venues data.
-    #       num_shows should be aggregated based on number of upcoming shows per venue.
-    # TODO: add try, except, finally block
-    # TODO: add documentation comment block
-    shows = db.session.query(Show).all()
+
+    shows = Show.query.all()
     data = []
     for show in shows:
         artist = show.artist
@@ -590,43 +588,51 @@ def create_shows():
 
 
 @app.route('/shows/create', methods=['POST'])
+# ✅ TODO: insert form data as a new Show record in the db
 def create_show_submission():
     """
     Create: /shows/create
-    return => success: /pages/home | error: /shows/create
+    return => /shows
     """
-    # called to create new shows in the db, upon submitting new show listing form
-    # ✅ TODO: insert form data as a new Show record in the db, instead
-    # TODO: UPDATE try, except, finally block
-    # ✅ TODO: add documentation comment block
 
-    data = request.form  # grab data from form input
-    show = Show()  # instantiate new show object
-    # query Artist by artist_id
-    artist = db.session.query(Artist).filter_by(id=data['artist_id']).first()
-    if not artist:  # if artist doesn't exist:
-        flash('Cannot find the artist requested. Please Try again.')
-        return redirect('/shows/create')
-    venue = db.session.query(Venue).filter_by(id=data['venue_id']).first()
-    if not venue:  # if venue doesn't exist
-        flash('Cannot find the venue requested. Please Try again.')
-        return redirect('/shows/create')
+    form = ShowForm()
+
     try:
-        show.start_time = dateutil.parser.parse(
-            data['start_time'])  # get start_time
+        data = request.form  # grab data from form input
+        show = Show()  # instantiate new show object
+        # query Artist by artist_id
+        artist = db.session.query(Artist).filter_by(
+            id=data['artist_id']).first()
+        if not artist:  # if artist doesn't exist:
+            flash('Cannot find the artist requested. Please Try again.')
+            return redirect('/shows/create')
+        venue = db.session.query(Venue).filter_by(id=data['venue_id']).first()
+        if not venue:  # if venue doesn't exist
+            flash('Cannot find the venue requested. Please Try again.')
+            return redirect('/shows/create')
+        try:
+            show.start_time = dateutil.parser.parse(
+                data['start_time'])  # get start_time
+        except:
+            flash('Please provide a valid date.')
+            return redirect('/shows/create')
+        show.artist_id = artist.id
+        show.venue_id = venue.id
+
+        db.session.add(show)
+        db.session.commit()
+        # ✅ on successful db insert, flash success
+        flash('Show was successfully listed!')
+        return redirect(url_for('shows'))
     except:
-        flash('Please provide a valid date.')
-        return redirect('/shows/create')
-    show.artist_id = artist.id
-    show.venue_id = venue.id
-    db.session.add(show)
-    db.session.commit()
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Show could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return render_template('pages/home.html')
+        db.session.rollback()
+        # ✅ TODO: on unsuccessful db insert, flash an error instead.
+        # e.g., flash('An error occurred. Show could not be listed.')
+        # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+        flash('An error occurred. Show could not be listed. Please try again.')
+        return redirect(url_for('create_shows'))
+    finally:
+        db.session.close()
 
 
 @app.errorhandler(404)
